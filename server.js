@@ -4,7 +4,7 @@ const http = require('http');
 
 const app = express();
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const wss = new WebSocket.Server({ server, perMessageDeflate: false });
 
 app.use(express.static('public'));
 
@@ -32,7 +32,7 @@ wss.on('connection', (ws) => {
     gridHeight: GRID_HEIGHT
   }));
 
-  // Broadcast new player to all
+  // Broadcast new player to all except sender
   broadcastExcept({
     type: 'playerJoined',
     player: players.get(playerId)
@@ -48,7 +48,7 @@ wss.on('connection', (ws) => {
           player.x = Math.max(0, Math.min(GRID_WIDTH, data.x));
           player.y = Math.max(0, Math.min(GRID_HEIGHT, data.y));
           
-          // Only broadcast to others, not back to sender
+          // Only broadcast to others, NOT back to sender
           broadcastExcept({
             type: 'playerMoved',
             playerId,
